@@ -1,0 +1,43 @@
+Brief de data digitel: file audit_details.csv  
+Cant de registros: 11.868.618
+8 Varibles:
+"IDENTIFIER"   "ATTRVAL"      "SEQUENCE"     "NAME"         "DETAIL"       "SERVERNAME"   "SERVERSERIAL" "ACTIONTIME"  
+Detalle de variables: 
+IDENTIFIER: 
+    Tipo String; 
+    417031 Niveles;
+    Identificador (NO ES UN VALOR UNICO); 
+    Contiene una especificacion de la accion sobre el equipo-
+
+ATTRVAL: 
+    Tipo Integer; 
+    1 nivel '1';
+    Este campo contiene el valor de '1' para todos los registros
+
+SEQUENCE: 
+    Tipo Integer; 
+    187 Niveles; 
+    Contiene un valor numerico comprendido entre 1 - 187
+
+NAME: 
+    Tipo String; 
+    284 Niveles; 
+
+DETAIL:
+    Tipo String; 
+    307097 niveles; 
+    Detalle de la accion sobre el equipo
+
+SERVERNAME: 
+    Tipo String; 
+    1 unico nivel 'COL_B_1'; 
+    Se estima que contenga el nombre del servidor
+
+SERVERSERIAL: 
+    Tipo Integer; ;
+
+ACTIONTIME:
+    Tipo Timestamp;
+    140875 niveles;
+    Desde 2013-11-01
+    Hasta 2014-02-06

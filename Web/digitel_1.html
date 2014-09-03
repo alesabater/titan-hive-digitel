@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+        <head>
+                <title>VISUAL</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <script src="js/d3.min.js" charset="utf-8"></script>
+                <script src="js/jquery.js" charset="utf-8"></script>
+                <script src="js/format.min.js" charset="utf-8"></script>
+                <link href="css/nv.d3.css" rel="stylesheet">
+                <script src="js/nv.d3.js" charset="utf-8"></script>
+                <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
+                <link href='http://fonts.googleapis.com/css?family=Andika' rel='stylesheet' type='text/css'>
+        </head>
+        <body>
+                <style>
+                        body{
+                                font-family:'Andika', sans-serif;
+                                background-color: rgba(33,33,33,1);
+                                color:white;
+                        }
+
+                        #tooltip {
+                                position: absolute;
+                                width: 150px;
+                                height: 50px;
+                                pointer-events: none;
+                                cursor: pointer;
+                                text-align: center;
+                                opacity:0.3;
+                     }
+
+                        #tooltip.hidden {
+                                display: none;
+                        }
+
+                        #tooltip p {
+                                margin: 0;
+                                font-size: 15px;
+                                line-height: 18px;
+                                cursor: pointer;
+                                text-align: left;
+                        }
+                        #tooltipCircle {
+                                position: absolute;
+                                width: 175px;
+                                height: 60px;
+                                padding: 5px;
+                                background-color: black;
+                                -webkit-border-radius: 10px;
+                                -moz-border-radius: 10px;
+                                border-radius: 5px;
+                                -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                                pointer-events: none;
+                                cursor: pointer;
+                                opacity:0.8;
+                                color:white;
+                                text-align: center;
+                     }
+
+                        #tooltipCircle.hidden {
+                                display: none;
+                        }
+
+                        #tooltipCircle p {
+                                margin: 0;
+                                font-family: sans-serif;
+                                font-size: 12px;
+                                line-height: 18px;
+                                cursor: pointer;
+                                text-align: left;
+                        }
+                        .axis path,
+                        .axis line {
+                               fill: none;
+                               stroke: black;
+                               shape-rendering: crispEdges;
+                        }
+
+                        .axis text {
+                               font-family: sans-serif;
+                               font-size: 11px;
+                        }
+                        .axis .minor line {
+                         stroke: #777;
+                         stroke-dasharray: 2,2;
+                        }
+
+                        #scale {
+                                margin: 8px;
+                                vertical-align: middle;
+                                display: inline-block;
+                                position: absolute;
+                                width: 150px;
+                                height: 20px;
+                                background: #ff0000;
+                                background: -moz-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                                background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ff0000), color-stop(50%,#ffff00), color-stop(100%,#007f08));
+                                background: -webkit-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                                background: -o-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                                background: -ms-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                                background: linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                                color: white;
+                                font-weight: bold;
+                                text-shadow: 0 0 3px black;
+                        }
+
+                        #scale .label-left {
+                                position: absolute;
+                                left: 10px;
+                                height: 20px;
+                                vertical-align: middle;
+                                line-height: 20px;
+                        }
+
+                        #scale .label-right {
+                                  position: absolute;
+                                  right: 10px;
+                                  height: 20px;
+                                  vertical-align: middle;
+                                  line-height: 20px;
+                        }
+
+                        #scale .label-center {
+                                  width: 150px;
+                                  display: inline-block;
+                                  text-align: center;
+                                  height: 20px;
+                                  vertical-align: middle;
+                                  line-height: 20px;
+                        }
+
+                        #histo{
+                          height:800px;
+                          width:1200px;
+                          position: absolute;
+                          top:35%;  /*cambiar a 35%dinamicamente*/
+                          left:18%;
+                          display:none;
+                          color:white;
+                        }
+                        .nv-legend-text{
+                          fill:white;
+                        }
+                        .tick{
+                          fill:white;
+                        }
+                        .nv-axisMaxMin{
+                          fill:white;
+                        }
+                        .nvtooltip
+                        {
+                            color:black;
+                            /*display: none;*/
+                        }
+                        .nv-context .nv-axisMaxMin
+                        {
+                            display: none;
+                            border-radius: 5px;
+                            border-style: solid 3px black;
+                        
+                        }
+
+                        .nv-context .nv-y .tick
+                        {
+                            display: none;
+                        
+                        }
+                        .nv-context .nv-x .tick
+                        {
+                            display: none;
+                        
+                        }
+                        .nv-focus .nv-y .tick
+                        {
+                            opacity: 0.3;
+                        }
+                        .nv-focus
+                        {
+                            fill: white;
+                        }
+                        #histo svg{
+                            height: 600px;
+                        }                       /*.nv-focus .nv-y .tick
+                        {
+                            display: none;
+    
+                        }*/
+                        rect.left, rect.right
+                        {
+                            opacity: 0.2;
+                        }
+                        .nv-focus .nv-groups path.nv-line
+                        {
+                            stroke-width:5px;
+                        }
+                        .nvtooltip
+                        {
+                            position: static;
+                            display:none;
+                        }
+
+
+                </style>
+
+                <div style="margin:3%;">
+                        <div><p style="font-size:24px; text-align: center">Set de datos de notificaciones de eventos de los elementos de la red móvil Digitel</p></div>
+                        <div><p style="font-size:24px; text-align: center">(Julio 2013 a Septiembre 2013 - 63MM de registros)</p></div>
+                        <div><p style="font-size:16px; text-align: left">Seleccione:</p></div>
+                        <div class="controls">
+                                <div class="btn-group" data-toggle="buttons-radio" >
+                                        <button class="btn btn-inverse" onclick="separarClusters('all')">Universo</button>
+                                        <button class="btn btn-inverse" onclick="separarClusters('proveedores')">Proveedores</button>
+                                        <button class="btn btn-inverse" onclick="separarClusters('severity')">Severity</button>
+
+                                </div>
+                        </div>
+                </div>
+                <div class= "leyend" style="position:absolute; width:1500px; height:940px; margin:auto">
+
+                </div>
+                <div>
+                    <div class="graph" align="center" style="position:relative; width:1500px; height:940px; margin:auto">
+                            <div id="tooltipCircleContainer" class="tooltipContainer">
+                                    <div id="tooltipCircle" class="hidden">
+                                            <strong><p id="proveedorNombre" style="text-align:center; text-transform:uppercase; font-size:16px"></p></strong>
+                                            <span style="">Alerta:</span> <span id="tipoAlerta" style="font-size:14px; text-align:left"></span></br>
+                                            <span style="">Cantidad:</span> <span id="cantidadAlerta" style="font-size:14px; text-align:left"></span>
+                                            <p id="cantidadAlerta" style="font-size:12px"></p>
+                                    </div>
+                            </div>
+                            <div id="tooltipContainer" class="tooltipContainer">
+                              <div id="tooltip" class="hidden">
+                                <p id="clusterTitle" style="text-align:center"></p>
+                              </div>
+                            </div>
+                    </div>
+                <div id="histo" style="margin-top:-7%">
+                    <div id="tituloHitograma" style="fill: #ff0000; font-size:23px; margin:auto; text-align: center; margin-bottom: 1%"></div>
+
+                  <svg></svg>
+
+
+
+        </body>
+        <script type="text/javascript">
+
+                /*SEVERITY
+                  0 -> clear
+                  1 -> undetermined
+                  2 -> warning
+                  3 -> minor
+                  4 -> mayor
+                  5 -> critical
+                */
+
+
+                var width = 1500, height = 940; //Canvas dimension
+                var nodesNumber = 200, //Number of nodes
+                    clustersNumber = 2,         //Clusters Quantity
+                    padding = 6,
+                    radius = d3.scale.sqrt().range([0, 15]),
+                    color = {"nokia":"#33CC33", "ZTE":"#FFCC33", "huawei":"#FF3300", "ericsson":"#3366CC"},
+                    colorCirculosInternos = {"nokia":"#87E687", "ZTE":"#FFE38F", "huawei":"#FF9073", "ericsson":"#87A7E6"},
+                    tipos_severidad = ["Clear","Undetermined","Warning","Minor","Mayor","Critical"],
+                    opacity_severidad = [0.3,0.46,0.54,0.62,0.7];
+                    leyenda = ["nokia","ZTE","huawei","ericsson"];
+                    leyenda_alert = ["clear", "undetermined", "warning", "minor", "mayor", "critical"];
+
+
+                var data = [
+                              {"total_mensaje": 8336910, "proveedor": "ericsson", "total_severity": [7265140, 127661, 0, 0, 708688, 235421], "severity_hora": [[317001, 285975, 271092, 258567, 250429, 254352, 260466, 261224, 266813, 291354, 303645, 321389, 322813, 336893, 346031, 343502, 328739, 321741, 330238, 332936, 337310, 329357, 309240, 284033], [4501, 5574, 5704, 5514, 5248, 6477, 5649, 4125, 4969, 6199, 5877, 4685, 6547, 5218, 6686, 5886, 3841, 4011, 5636, 6500, 4194, 5527, 4826, 4267], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [26098, 23333, 22947, 20460, 20264, 22064, 20938, 20688, 24817, 33302, 36138, 41712, 42299, 36642, 37356, 36002, 38081, 34890, 30211, 29124, 31013, 29532, 26728, 24049], [7756, 7205, 7000, 6738, 6807, 6848, 6391, 6190, 6952, 10766, 14599, 14895, 14712, 13514, 13618, 13237, 12411, 10738, 9728, 9406, 9762, 9444, 8754, 7950]]},
+                              {"total_mensaje": 21338825, "proveedor": "nokia", "total_severity": [19602235, 158379, 0, 0, 905479, 672732], "severity_hora": [[820696, 720802, 627493, 497233, 470715, 535078, 528739, 459844, 507142, 598498, 721515, 947367, 962781, 977116, 1057599, 1163363, 1100726, 1061319, 1056440, 1013425, 981375, 942133, 943230, 907606], [3877, 3462, 2670, 2495, 2830, 5743, 6926, 7049, 7784, 9212, 7055, 7357, 8881, 7752, 9467, 10733, 8418, 7031, 7199, 7484, 7259, 5510, 8774, 3411], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [21940, 19435, 17306, 14962, 14189, 47094, 28656, 21906, 26355, 41013, 54119, 59344, 58476, 56611, 59612, 54779, 51523, 44638, 38171, 34344, 35782, 36669, 34922, 33633], [17349, 16598, 15644, 13251, 13263, 19197, 17397, 15698, 18109, 34324, 52837, 52290, 46347, 44682, 51875, 47451, 38269, 28320, 24420, 22055, 21652, 20723, 20936, 20045]]},
+                              {"total_mensaje": 2757582, "proveedor": "ZTE", "total_severity": [2353741, 29424, 214, 48069, 89252, 236882], "severity_hora": [[41683, 43208, 35065, 36219, 40951, 45553, 38467, 39235, 49599, 80207, 109878, 134975, 150940, 148675, 151922, 140776, 128954, 129086, 146430, 167684, 179539, 163378, 97389, 53928], [519, 528, 374, 553, 518, 969, 877, 738, 1202, 2097, 2130, 1523, 2588, 1804, 2018, 1150, 486, 652, 1751, 1699, 1395, 1967, 1294, 592], [0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 75, 49, 1, 24, 6, 3, 53, 0, 0, 0, 0, 0, 0, 0], [873, 949, 999, 650, 654, 885, 1007, 1383, 1842, 2812, 4426, 3979, 3520, 3666, 4530, 3667, 2406, 1837, 1960, 1667, 1312, 1121, 1038, 886], [2298, 2336, 1722, 1920, 1684, 2582, 2325, 2533, 2619, 4030, 6001, 6171, 6171, 6101, 7061, 6206, 4357, 3488, 3184, 3761, 3650, 3790, 2748, 2514], [6524, 6685, 5925, 5108, 4995, 6045, 5330, 4897, 5002, 10153, 17375, 17044, 16609, 15734, 19193, 16725, 12561, 10007, 9709, 9134, 8989, 8693, 7474, 6971]]},
+                              {"total_mensaje": 28556555, "proveedor": "huawei", "total_severity": [26079866, 447587, 0, 67981, 1720089, 241032], "severity_hora": [[1276814, 1268159, 1048848, 841740, 867698, 858933, 868924, 779471, 829698, 988585, 1060824, 1251309, 1221119, 1096161, 1160290, 1102479, 1121972, 1118255, 1105611, 1195606, 1229393, 1244932, 1261539, 1281506], [20030, 19472, 12803, 11643, 9806, 17225, 15168, 12374, 20454, 28365, 19203, 22880, 24906, 19627, 25948, 26751, 15799, 17256, 18218, 23528, 23736, 15374, 15791, 11230], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1601, 1419, 1441, 1053, 987, 1119, 1125, 1121, 1905, 3610, 3541, 4192, 3895, 5073, 5585, 4624, 3620, 3307, 4130, 3942, 3616, 3306, 2181, 1588], [81737, 76448, 54033, 49291, 48919, 48798, 49514, 50488, 48544, 61880, 86356, 87645, 88007, 93574, 99042, 95283, 80393, 77385, 73732, 76503, 75172, 75607, 66530, 75208], [6266, 6255, 5432, 4109, 5686, 4391, 4238, 4750, 7015, 11458, 17167, 19076, 17599, 18876, 19377, 17347, 14060, 10965, 9242, 7956, 7981, 7870, 7103, 6813]]}
+                            ];
+
+
+
+                var nodes = new Array();
+                data.forEach(function(d) {
+                  for(i=0; i<d.total_severity.length; i++){
+                    nodo = new Object();
+                    nodo.radius = Math.sqrt(radius(d.total_severity[i]))/3;
+                    nodo.proveedor = d.proveedor;
+                    nodo.color = color[d.proveedor];
+                    nodo.severity = i;
+                    nodo.total_severity = d.total_severity;
+                    nodes.push(nodo);
+                  }
+                });
+
+
+            function manageForceField(){
+                    this.gravity = -0.01,
+                    this.damper = 0.1,
+                    this.vis = null,
+                    this.vis2 = null,
+                    this.force = null,
+                    this.circlesGroup = null,
+                    this.circles = null,
+                    this.center = {x:width/2, y:height/3.6},
+                    clusterCentersProveedores = {"nokia":{"x":300,"y":220},"ZTE":{"x":600,"y":220},"huawei":{"x":900,"y":220}, "ericsson":{"x":1200,"y":220}},
+                    clusterCentersSeverity = [{"x":375,"y":200},{"x":750,"y":200},{"x":1025,"y":200},{"x":375,"y":500},{"x":750,"y":500},{"x":1025,"y":500}],
+                    that = this,
+                    activeCluster = "all";
+
+                    this.insertSvg = function(){
+                            this.vis = d3.select(".graph").append("svg")
+                                            .attr("width", width)
+                                            .attr("height", height)
+                                            .attr("align","center")
+                                             .attr("id", "svg_vis");
+                            this.vis2 = d3.select(".leyend").append("svg")
+                                            .attr("width", 20)
+                                            .attr("height", 20)
+                                            .attr("align","center")
+                                            .attr("id", "svg_vis2");
+                    }
+                    this.insertCircles = function(){
+
+                            circlesGroup = this.vis.selectAll(".node")
+                                                    .data(nodes)
+                            .enter().append("g")
+                            .attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")"; })
+                                                                                .attr("class", "node")
+                            .attr("proveedor",function(d){return d.proveedor})
+                            .attr("severity",function(d){return d.severity})
+                            .on("click",function(d){
+                            mostrarLineaTiempo(this)
+                            }).on("mouseover",function(d){
+                                                                                   //Agrego tooltip que aparece cuando se para el cursos sobre un circulo
+                            d3.select("#tooltipCircle")
+                            .style("left",  d.x + "px")
+                            .style("top",  d.y + "px");
+                            $("#proveedorNombre").html(d.proveedor);
+                            $("#tipoAlerta").html("<strong>"+tipos_severidad[d.severity]+"</strong>");
+                            $("#cantidadAlerta").html("<strong>"+format( "#,##0.####",d.total_severity[d.severity])+"</strong>");
+                            $("#proveedorNombre").html(d.proveedor);
+
+
+                            d3.select("#tooltipCircle").classed("hidden", false);
+                                                                                })
+                                                                                .on("mouseout", function() {
+                            d3.select("#tooltipCircle").classed("hidden", true);
+                                                                                });
+
+                                                        circles = circlesGroup.append("circle")
+                                                                        .attr("r", function(d) { return d.radius })
+                                                                        .style("fill", function(d) { return d.color; })
+                            .attr("title",function(d){return d.title})
+                            .style("opacity",function(d){return opacity_severidad[d.severity] });
+
+                            circlesGroup.append("text")
+                                  .attr("dy", ".3em")
+                                  .style("text-anchor", "middle")
+                                  .style("fill", "#ffffff")
+                                  .style("font-family", "Arial")
+                                  .style("font-size",function(d){ 
+                                    return (radius(d.radius)/3.7)+"px"
+                                   })
+                                  .text(function(d) { return d.percentage });
+
+
+
+                                                        //this.vis.append("circle").attr("cx", 300).attr("cy", 300).attr("r", 10).style("fill", "purple");
+                                                        //this.vis.append("circle").attr("cx", 600).attr("cy", 300).attr("r", 10).style("fill", "purple");
+                                                        //this.vis.append("circle").attr("cx", 900).attr("cy", 300).attr("r", 10).style("fill", "purple");
+                                                        //this.vis.append("circle").attr("cx", 1200).attr("cy", 300).attr("r", 10).style("fill", "purple");
+
+                    }
+                    var i = 0;
+                    this.insertLegend = function(){
+
+
+                                this.vis2.append("svg:image")
+                                   .attr('x',80)
+                                   .attr('y',90)
+                                   .attr('width', 250)
+                                   .attr('margin-top', 100)
+                                   .attr('height', 250)
+                                   .attr('id',"imagenC")
+                                   .attr("xlink:href","img/leyendaC.png")
+
+                                this.vis2.append("svg:image")
+                                   .attr('x',60)
+                                   .attr('y',230)
+                                   .attr('width', 250)
+                                   .attr('margin-top', 100)
+                                   .attr('height', 250)
+                                   .attr('id',"imagenC")
+                                   .attr("xlink:href","img/digitel.png")
+
+                        var gradient0 = this.vis2.append("svg:defs")
+                                        .append("svg:linearGradient")
+                                        .attr("id", "gradient0")
+                                        .attr("spreadMethod", "pad");
+                              gradient0.append("svg:stop")
+                                  .attr("offset", "50%")
+                                  .attr("stop-color", color[leyenda[0]])
+                                  .attr("stop-opacity", .3);
+
+                              gradient0.append("svg:stop")
+                                  .attr("offset", "100%")
+                                  .attr("stop-color",color[leyenda[0]])
+                                  .attr("stop-opacity", .7);
+
+                        var gradient1 = this.vis2.append("svg:defs")
+                                        .append("svg:linearGradient")
+                                        .attr("id", "gradient1")
+                                        .attr("spreadMethod", "pad");
+                              gradient1.append("svg:stop")
+                                  .attr("offset", "50%")
+                                  .attr("stop-color", color[leyenda[1]])
+                                  .attr("stop-opacity", .3);
+
+                              gradient1.append("svg:stop")
+                                  .attr("offset", "100%")
+                                  .attr("stop-color",color[leyenda[1]])
+                                  .attr("stop-opacity", .7);
+
+                        var gradient2 = this.vis2.append("svg:defs")
+                                        .append("svg:linearGradient")
+                                        .attr("id", "gradient2")
+                                        .attr("spreadMethod", "pad");
+                              gradient2.append("svg:stop")
+                                  .attr("offset", "50%")
+                                  .attr("stop-color", color[leyenda[2]])
+                                  .attr("stop-opacity", .3);
+
+                              gradient2.append("svg:stop")
+                                  .attr("offset", "100%")
+                                  .attr("stop-color",color[leyenda[2]])
+                                  .attr("stop-opacity", .7);
+
+                        var gradient3 = this.vis2.append("svg:defs")
+                                        .append("svg:linearGradient")
+                                        .attr("id", "gradient3")
+                                        .attr("spreadMethod", "pad");
+                              gradient3.append("svg:stop")
+                                  .attr("offset", "50%")
+                                  .attr("stop-color", color[leyenda[3]])
+                                  .attr("stop-opacity", .3);
+
+                              gradient3.append("svg:stop")
+                                  .attr("offset", "100%")
+                                  .attr("stop-color",color[leyenda[3]])
+                                  .attr("stop-opacity", .7);
+
+
+                        legend = this.vis2.append("g")
+                                    .attr("class", "legend")
+                                    .attr("x", width - 65)
+                                    .attr("y", 25)
+                                    .attr("height", 100)
+                                    .attr("width", 100);
+
+
+                          legend.selectAll('g').data(leyenda)
+                              .enter()
+                              .append('g')
+                              .each(function(d, i) {
+                                var clase = "#gradient" + i;
+                                  var g = d3.select(this);
+                                  console.log(d);
+                                  g.append("rect")
+                                    .attr("x",130)
+                                    .attr("y", i*25 + 10)
+                                    .attr("width", 100)
+                                    .attr("height", 10)
+                                    .style("fill","url(#gradient"+i+")");
+                                    //insertLegendColors(color[leyenda[i]];
+
+                                    g.append("text")
+                                      .attr("x", 250)
+                                      .attr("y", i * 25 + 18)
+                                      .attr("height",30)
+                                      .attr("width",100)
+                                      .style("fill", "white")
+                                      .text(leyenda[i]);
+
+                              });
+
+                    }
+
+
+                    /*function insertLegendColors(color){
+
+
+                         var gradient = this.vis.append("svg:defs")
+                                        .append("svg:linearGradient")
+                                        .attr("id", "gradient")
+                                        .attr("spreadMethod", "pad");
+                              gradient.append("svg:stop")
+                                  .attr("offset", "50%")
+                                  .attr("stop-color", color[leyenda[i]])
+                                  .attr("stop-opacity", .3);
+
+                              gradient.append("svg:stop")
+                                  .attr("offset", "100%")
+                                  .attr("stop-color",color[leyenda[i]])
+                                  .attr("stop-opacity", .7);
+                                  i++;
+
+
+                           legend = this.vis.append("g")
+                                    .attr("class", "legend")
+                                    .attr("x", width - 65)
+                                    .attr("y", 25)
+                                    .attr("height", 100)
+                                    .attr("width", 100);
+                    }*/
+
+
+                    this.groupAll = function(){this.force = d3.layout.force()
+                                    .nodes(nodes)
+                                    .size([width, height])
+                                    .gravity(this.gravity)
+                                    .charge(function(d){return (Math.pow(d.radius, 2.0) / 5)*(-1)})
+                                    .friction(0.9)
+                                    .on("tick",this.groupAllTick)
+                                    .start(); },
+                                                        this.breakGroups = function(){this.force = d3.layout.force()
+                                    .nodes(nodes)
+                                    .size([width, height])
+                                    .gravity(0.05)
+                                    .charge(function(d){return -500})
+                                    .friction(0.9)
+                                    .on("tick",this.groupClustersTick)
+                                    .start();
+                                    //Append text under circle
+                                    circles.each(function(d,i){
+                                    if(that.activeCluster == "proveedores"){
+                                    center = clusterCentersProveedores[d.proveedor];
+                                    titulo = d.proveedor;
+
+
+                                    }else if(that.activeCluster == "severity"){
+                                    center = clusterCentersSeverity[d.severity];
+                                    titulo = tipos_severidad[d.severity];
+                                    };
+
+                                    var div = d3.select("#tooltip")
+                                    .style("left", center.x-75 + "px") //
+                                    .style("top", center.y+180 + "px") // POSICION DE LOS LABEL DE CADA NODO
+                                    //.classed("hidden",false);
+
+                                    $("#clusterTitle").html(titulo); //Cambio titulo
+                                    var append = $("#tooltipContainer").clone(); //cClono el tooltip
+                                    append.children("#tooltip").addClass("tooltipAdded"); // le agrgo clase que me permtie eliminarlo
+                                    append.children("#tooltip").removeClass("hidden"); //Le quito la clase hidden
+                                    $(append).hide().appendTo(".graph").fadeIn(1500);   //ago que aparezca
+                                    })
+                                },
+                      this.groupAllTick = function(e){
+                                        circles.each(function(d){
+                                                  d.x = d.x + (that.center.x - d.x) * (0.1 + 0.02) * e.alpha;
+                                                  d.y = d.y + (that.center.y - d.y) * (0.1 + 0.02) * e.alpha;
+                                        });
+                                        circlesGroup.attr("transform", function(d,i){return "translate(" + [d.x, d.y] + ")";})
+
+                                  },
+                      this.groupClustersTick = function(e){
+
+                                              circles.each(function(d,i){
+                                                    if(that.activeCluster == "proveedores"){
+                                                      this.center = clusterCentersProveedores[d.proveedor];
+                                                    }else if(that.activeCluster == "severity"){
+                                                      this.center = clusterCentersSeverity[d.severity];
+                                                    }
+                                                      d.x = d.x + (this.center.x - d.x) * 0.2 * e.alpha;
+                                                      d.y = d.y + (this.center.y - d.y) * 0.2 * e.alpha;
+                                            });
+                                            circlesGroup.attr("transform", function(d,i){return "translate(" + [d.x, d.y] + ")";});
+                                      }
+                            }
+
+                   var manager = new manageForceField();
+                   manager.insertSvg();
+                   manager.insertCircles();
+                   manager.insertLegend();
+                   manager.groupAll();
+
+                   function separarClusters(activeCluster){
+                          $("#imagenC").show(500);
+                          $("#tituloHitograma").html("");
+                          $("#xAxis" ).remove();
+                          $("#circulosExternos").remove();
+                          $("#circulosInternos").remove();
+                           $( ".tooltipAdded" ).remove();
+                           $("#histo").css("display","none");
+                           $(".node").show(800);
+                           manager.force.stop();
+                           manager.activeCluster = activeCluster;
+                           if(activeCluster != "all"){
+                                  if(activeCluster == "proveedores"){
+                                   manager.gravity = 0.00;
+                                   manager.breakGroups();
+                                   group = true;
+                                  }else if(activeCluster == "severity"){
+                                   manager.gravity = 0.00;
+                                   manager.breakGroups();
+                                   group = true;
+                                  }
+
+                           }else{
+                                   manager.gravity = -0.01;
+                                   manager.groupAll();
+                                   group = false;
+                           }
+
+                   }
+
+                   function seleccionColores(cantidadDeColores, dataPorHora)
+                   {    
+                        arrayColores = new Array();
+                        for(var i = 0; i<cantidadDeColores; i++){
+
+                            arrayColores.push(color[dataPorHora[i].proveedor]);
+                        }
+                        return arrayColores;
+                   }
+
+                   function mostrarLineaTiempo(that){
+                      //$(".node").hide(500);
+
+                      //manager.vis.append(<text x="0" y="15" fill="red">I love SVG!</text>)
+                      manager.force.stop();
+                      $( ".tooltipAdded" ).remove();
+                      $(that).siblings().hide(800);
+                      d3.select(that).transition().duration(800).attr("transform",function(d){ return "translate(" + [width/2, height/3.3] + ")"});
+                      var dataPorHora = nvd3Object($(that).attr("proveedor"),$(that).attr("severity"));
+
+
+                      
+                      nv.addGraph(function() {
+                      var chart = nv.models.lineWithFocusChart();
+                      colores = seleccionColores(dataPorHora.length, dataPorHora);
+                      chart.color(colores);
+
+                      chart.xAxis
+                      .tickFormat(d3.format(',f'));
+
+                      chart.yAxis
+                      .tickFormat(d3.format(',.2f'));
+
+                      chart.y2Axis
+                      .tickFormat(d3.format(',.2f'));
+
+
+                      //chart.tooltipContent(function(key, y, e, graph) { return 'Some String' })
+
+                      
+                      $("#histo").css("display","inline");
+                      d3.select('#histo svg')
+                    .datum(nvd3Object($(that).attr("proveedor"),$(that).attr("severity")))
+                      .transition().duration(1000)
+                      .call(chart);
+                      $(".nv-context").attr("transform", "translate(0,485)");
+                      $(".nv-lineWithFocusChart").attr("transform","translate(85,30)");
+                    $("#tituloHitograma").html('Acumulado de Mensajes '+tipos_severidad[$(that).attr("severity")]+' por Hora'); //agrego el titulo
+
+                      return chart;
+                    });
+
+                      $(that).fadeOut(1800);
+                      $("#imagenC").hide(500);
+                   };
+
+
+                   function getDataDiaria(proveedor, severity){
+                      for (var i = 0; i < data.length; i++) {
+                        if(data[i].proveedor == proveedor){
+                            if(data[i].total_severity[severity]>0)
+                            {
+                          result = new Array();
+                          for (var j = 0; j < data[i].severity_hora[severity].length; j++) {
+                            dataPoint = new Object();
+                            dataPoint.x = j;
+                            dataPoint.y = data[i].severity_hora[severity][j];
+                            result.push(dataPoint);
+                          };
+                          return result;
+                            }
+                            else{
+                                return 0;
+                            }
+                        }
+                      };
+                   }
+
+
+
+                   var proveedores = ["ericsson","nokia","ZTE","huawei"];
+
+                  function nvd3Object(proveedor, severity){
+                      console.log("entrada")
+                      r = new Array();
+                      for(var i = 0; i<proveedores.length ; i++) {
+                      proveedor = proveedores[i];
+                      container = new Object();
+                      container.proveedor = proveedor;
+                      container.key = proveedor+ "-" +tipos_severidad[severity];
+                      container.values = getDataDiaria(proveedor,severity);
+                      if(container.values!=0){
+                      r.push(container);}
+                      }
+                      //r.push(container);
+                      //r.push(container);
+                      console.log(JSON.stringify(r));
+                      return r;
+                   }
+
+        </script>
+</html> 

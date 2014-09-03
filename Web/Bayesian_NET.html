@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>BayNet</title>
+        <script type="text/javascript" src="js/d3.v3.min.js"></script>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <link href='css/bootstrap.css' rel='stylesheet' type='text/css'>
+        <link href="http://getbootstrap.com/2.3.2/assets/css/bootstrap.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Andika' rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+        <style>
+            circle:hover{ 
+                fill: orange;
+            }
+            body{
+                    font-family:'Andika', sans-serif;
+                    color:#39AECF;
+                    background-color: rgb(33,33,33);
+            }
+            #tooltipCircle {
+                        position: absolute;
+                        width: 175px;
+                        height: 60px;
+                        padding: 5px;
+                        background-color: black;
+                        -webkit-border-radius: 10px;
+                        -moz-border-radius: 10px;
+                        border-radius: 5px;
+                        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                        pointer-events: none;
+                        cursor: pointer;
+                        opacity:0.8;
+                        color:white;
+                        text-align: center;
+            }
+
+            #tooltipCircle.hidden {
+                        display: none;
+            }
+
+            #tooltipCircle p {
+                        margin: 0;
+                        font-family: sans-serif;
+                        font-size: 12px;
+                        line-height: 18px;
+                        cursor: pointer;
+                        text-align: left;
+            }
+            #tooltip {
+                    position: absolute;
+                    width: 140px;
+                    height: auto;
+                    padding: 5px;
+                    background-color: white;
+                    -webkit-border-radius: 10px;
+                    -moz-border-radius: 10px;
+                    border-radius: 5px;
+                    pointer-events: none;
+            }
+            #tooltipContainer {
+                    display: none;
+            }
+            #tooltip p {
+                    margin: 0;
+                    font-family:'Andika', sans-serif;
+                    font-size: 14px;
+                    line-height: 18px;
+                    opacity:0.7;
+            }
+            .axis path,
+            .axis line {
+                   fill: none;
+                   stroke: black;
+                   shape-rendering: crispEdges;
+            }
+
+            .axis text {
+                   font-family: sans-serif;
+                   font-size: 11px;
+            }
+            .axis .minor line {
+             stroke: #777;
+             stroke-dasharray: 2,2;
+            }
+            #scale {
+                    margin: 8px;
+                    vertical-align: middle;
+                    display: inline-block;
+                    position: absolute;
+                    width: 150px;
+                    height: 20px;
+                    background: #ff0000;
+                    background: -moz-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                    background: -webkit-gradient(linear, left top, right top, color-stop(0%,#ff0000), color-stop(50%,#ffff00), color-stop(100%,#007f08));
+                    background: -webkit-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                    background: -o-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                    background: -ms-linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                    background: linear-gradient(to right,  #ff0000 0%,#ffff00 50%,#007f08 100%);
+                    color: white;
+                    font-weight: bold;
+                    text-shadow: 0 0 3px black;
+            }
+
+            #scale .label-left {
+                    position: absolute;
+                    left: 10px;
+                    height: 20px;
+                    vertical-align: middle;
+                    line-height: 20px;
+            }
+
+            #scale .label-right {
+                      position: absolute;
+                      right: 10px;
+                      height: 20px;
+                      vertical-align: middle;
+                      line-height: 20px;
+            }
+
+            #scale .label-center {
+                      width: 150px;
+                      display: inline-block;
+                      text-align: center;
+                      height: 20px;
+                      vertical-align: middle;
+                      line-height: 20px;
+            }
+
+            </style>
+        
+    <img style="position:absolute; top:250px; left:5%;"class="img-responsive" border="0" src="img/leyendaDigitel.jpeg" width="250" height="228">
+        <div>
+
+          <div style="margin:3%;">
+            <div><p style="font-size:24px; text-align: center">Relación de eventos simultáneos por ventana de tiempo</p></div>
+            <!--<div><p style="font-size:16px; text-align: left">Seleccione un nodo:</p></div>
+            <form class="form-search">
+              <div class="input-append">
+                <input type="text" class="span2 search-query" placeholder="Indique un nodo">
+                <button type="submit" class="btn btn-info"><i class="icon-search icon-white"></i></button>
+              </div>
+            </form>-->
+            <div class="controls">
+                <div class="btn-group" data-toggle="buttons-radio" >
+                    <button class="btn btn-info" onclick="backTime()"><i class="icon-arrow-left icon-white"></i> Anterior</button>
+                    <button class="btn btn-info" onclick="nextTime()">Siguiente <i class="icon-arrow-right icon-white"></i></button>
+                    <!--<button class="btn btn-inverse" onclick="separarClusters('severity')">Severity</button>-->
+                </div>
+            </div>
+            <h3 id="time" style="color:#39AECF; stroke:white;">De 8:56 am a 9:00 am</h3>
+           <!-- <p >HORA</p>
+             <div class="leyend">
+
+                    <div class="well well-small" width:20px> LEYENDA 1</div>
+                    <div class="well well-small"> LEYENDA 1</div>
+                    <div class="well well-small"> LEYENDA 1</div>
+                    <div class="well well-small"> LEYENDA 1</div>
+                   <div class="btn-group" data-toggle="buttons-radio" >
+                            <button class="btn" onclick="separarClusters('all')">Universo</button>
+                            <button class="btn" onclick="separarClusters('proveedores')">Proveedores</button>
+                            <button class="btn" onclick="separarClusters('severity')">Severity</button>
+
+                    </div>
+            </div>-->
+          </div>
+          
+          <div class="graph" align="center" style="position:relative; width: 900px; height: 700px; margin:auto">
+           <!-- <div id="scale"><span class="label-left">0%</span><span class="label-center">50%</span><span class="label-right">100%</span></div>-->
+           
+            <div id="tooltipCircleContainer" class="tooltipContainer">
+                <div id="tooltipCircle" class="hidden">
+                    <strong><p id="proveedorNombre" style="text-align:center; text-transform:uppercase; font-size:16px"></p></strong>
+                    <span style="">Proveedor:</span> <span id="tipoAlerta" style="font-size:14px; text-align:left"></span></br>
+                   <!-- <span style="">Cantidad:</span> <span id="cantidadAlerta" style="font-size:14px; text-align:left"></span>
+                    <p id="cantidadAlerta" style="font-size:12px"></p>-->
+                </div>
+            </div>
+            <div id="tooltipContainer" class="tooltipContainer">
+              <div id="tooltip" style="position:absolute" class="hidden">
+                <strong><p id="value" style="text-align:center"></p></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script type="text/javascript">
+
+            //Width and height
+            var w = 1000;
+            var h = 600;
+            var leyenda = ["Nokia","Zte","Huawei","Ericsson"];
+            var color = {"Nokia":"#33CC33", "Zte":"#FFCC33", "Huawei":"#FF3300", "Ericsson":"#3366CC"};
+            var tiempo = 1;
+            var t_array = ["De 8:56 am a 9:00 am","De 9:00 am a 9:20 am","De 9:20 am a 9:32 am"]
+            //Original data
+            var dataset = {
+                nodes: [
+                   { name: "ANTIMANO", provider:"Nokia", tiempo:"1"}, // 0
+                    { name: "AVPEDROTQ1", provider:"Nokia", tiempo:"1"}, // 1
+                    { name: "BELARTES1", provider:"Nokia", tiempo:"1"}, // 2
+                    { name: "BELMODOS", provider:"Nokia", tiempo:"1"}, // 3
+                    { name: "CANDELAR", provider:"Nokia", tiempo:"1"}, // 4
+                    { name: "CARRIUNO1", provider:"Nokia", tiempo:"1"}, // 5
+                    { name: "CATEDGUA", provider:"Nokia", tiempo:"1"}, // 6
+                    { name: "CAUCACEN", provider:"Nokia", tiempo:"1"}, // 7
+                    { name: "CCCTOUT", provider:"Zte", tiempo:"1"}, // 8
+                    { name: "CCSBSC01", provider:"Zte", tiempo:"1, 3"}, // 9
+                    { name: "CCSBSC02", provider:"Zte", tiempo:"1"}, // 10
+                    { name: "CCSBSC03", provider:"Zte", tiempo:"1"}, // 11
+                    { name: "CCSBSC04", provider:"Zte", tiempo:"1, 2"}, // 12
+                    { name: "CCSBSC07", provider:"Zte", tiempo:"1"}, // 13
+                    { name: "CCSBSC08", provider:"Zte", tiempo:"1"}, // 14
+                    { name: "CCSBSC11", provider:"Zte", tiempo:"1"}, // 15
+                    { name: "CCSBSC12", provider:"Zte", tiempo:"1"}, // 16
+                    { name: "CCSBSC14", provider:"Zte", tiempo:"1"}, // 17
+                    { name: "CCSBSC17", provider:"Zte", tiempo:"1"}, // 18
+                    { name: "CCSBSC18", provider:"Zte", tiempo:"1, 2"}, // 19
+                    { name: "CCSBSC19", provider:"Zte", tiempo:"1"}, // 20
+                    { name: "CHORRDOS", provider:"Zte", tiempo:"1"}, // 21
+                    { name: "CORTITRE1", provider:"Zte", tiempo:"1"}, // 22
+                    { name: "DISTRUIC", provider:"Zte", tiempo:"1"}, // 23
+                    { name: "DOSCAMIN", provider:"Zte", tiempo:"1"}, // 24
+                    { name: "ESMERDOS", provider:"Zte", tiempo:"1"}, // 25
+                    { name: "ESTANCIA1", provider:"Zte", tiempo:"1"}, // 26
+                    { name: "FLOREDOS1", provider:"Zte", tiempo:"1"}, // 27
+                    { name: "FLSTAUNO", provider:"Zte", tiempo:"1"}, // 28
+                    { name: "FUENTE1", provider:"Zte", tiempo:"1"}, // 29
+                    { name: "HMILITAR", provider:"Zte", tiempo:"1"}, // 30
+                    { name: "HOSPITAL", provider:"Zte", tiempo:"1"}, // 31
+                    { name: "MARIPUNO", provider:"Zte", tiempo:"1"}, // 32
+                    { name: "MONICDOS", provider:"Zte", tiempo:"1"}, // 33
+                    { name: "MTECLARO", provider:"Zte", tiempo:"1"}, // 34
+                    { name: "OBSERVA", provider:"Zte", tiempo:"1"}, // 35
+                    { name: "OCUMAUNO", provider:"Zte", tiempo:"1"}, // 36
+                    { name: "PMROMAYO1", provider:"Zte", tiempo:"1"}, // 37
+                    { name: "PPLBOLEI", provider:"Nokia", tiempo:"1"}, // 38
+                    { name: "PQESTE1", provider:"Ericsson", tiempo:"1"}, // 39
+                    { name: "RNC07CCS", provider:"Ericsson", tiempo:"1, 2"}, // 40
+                    { name: "RNC10CCS", provider:"Ericsson", tiempo:"1"}, // 41
+                    { name: "SALESIANO", provider:"Ericsson", tiempo:"1"}, // 42
+                    { name: "SJRIOCHI1", provider:"Ericsson", tiempo:"1"}, // 43
+                    { name: "TAMBOR", provider:"Ericsson", tiempo:"1"}, // 44
+                    { name: "UCCCHAGUA", provider:"Ericsson", tiempo:"1"}, // 45
+                    { name: "URBURDAN", provider:"Ericsson", tiempo:"1"}, // 46
+                    { name: "USBUNO1", provider:"Ericsson", tiempo:"1"}, // 47
+                    { name: "VIRGINIA", provider:"Ericsson", tiempo:"1"}, // 48
+                    { name: "VTALEGRE", provider:"Ericsson", tiempo:"1"}, // 49
+                    { name: "YAGUARA", provider:"Ericsson", tiempo:"1"}, // 50
+                    { name: "BSC-943683/BCF-117", provider:"Ericsson", tiempo:"2"}, // 51
+                    { name: "BSC-951602", provider:"Ericsson", tiempo:"2"}, // 52
+                    { name: "ROCATAR", provider:"Ericsson", tiempo:"2"}, // 53
+                    { name: "RNC-7/WBTS-432", provider:"Ericsson", tiempo:"2"}, // 54
+                    { name: "BSC-49146/BCF-46/BTS-47", provider:"Ericsson", tiempo:"2"}, // 55
+                    { name: "BSC-215895/BCF-225", provider:"Ericsson", tiempo:"2"}, // 56
+                    { name: "BSC-951601", provider:"Ericsson", tiempo:"2"}, // 57
+                    { name: "BSC-86293", provider:"Huawei", tiempo:"2, 3"}, // 58
+                    { name: "BSC-943683", provider:"Huawei", tiempo:"2"}, // 59
+                    { name: "ANTONUNO", provider:"Huawei", tiempo:"2"}, // 60
+                    { name: "UMINDEF", provider:"Huawei", tiempo:"2"}, // 61
+                    { name: "TEQUEUNO3", provider:"Huawei", tiempo:"2"}, // 62
+                    { name: "PZAMIRAND33", provider:"Huawei", tiempo:"2"}, // 63
+                    { name: "CCSBSC15", provider:"Huawei", tiempo:"2"}, // 64
+                    { name: "TEQUEUNO", provider:"Huawei", tiempo:"2"}, // 65
+                    { name: "PZAMIRAND1", provider:"Huawei", tiempo:"2"}, // 66
+                    { name: "23ENERO", provider:"Huawei", tiempo:"3"}, // 67
+                    { name: "23ENERO1", provider:"Ericsson", tiempo:"3"}, // 68
+                    { name: "ALAZAN", provider:"Ericsson", tiempo:"3"}, // 69
+                    { name: "ALAZAN1", provider:"Ericsson", tiempo:"3"}, // 70
+                    { name: "BSC-86290", provider:"Ericsson", tiempo:"3"}, // 71
+                    { name: "BSC-86291/BCF-13", provider:"Ericsson", tiempo:"3"}, // 72
+                    { name: "BSC-943684", provider:"Ericsson", tiempo:"3"}, // 73
+                    { name: "BSC-943684/BCF-24/BTS-26", provider:"Ericsson", tiempo:"3"}, // 74
+                    { name: "GNASGTRE", provider:"Huawei", tiempo:"3"}, // 75
+                    { name: "GNASGTRE1", provider:"Huawei", tiempo:"3"}, // 76
+                    { name: "MANGUITO", provider:"Huawei", tiempo:"3"}, // 77
+                    { name: "MANICOMI1", provider:"Huawei", tiempo:"3"}, // 78
+                    { name: "MANICOMI33", provider:"Huawei", tiempo:"3"}, // 79
+                    { name: "RNC-7", provider:"Huawei", tiempo:"3"}, // 80
+                    { name: "SJRIOCHI", provider:"Huawei", tiempo:"3"}, // 81
+                    { name: "SJRIOCHI2", provider:"Huawei", tiempo:"3"}, // 82
+                    { name: "ANTIMANO1", provider:"Nokia", tiempo:"1"}, // 83
+                    { name: "AVPEDROTQ2B", provider:"Nokia", tiempo:"1"}, // 84
+                    { name: "BELARTES22", provider:"Nokia", tiempo:"1"}, // 85
+                    { name: "BELMODOS3", provider:"Nokia", tiempo:"1"}, // 86
+                    { name: "CANDELAR1", provider:"Nokia", tiempo:"1"}, // 87
+                    { name: "CARRIUNO33", provider:"Nokia", tiempo:"1"}, // 88
+                    { name: "CATEDGUA3", provider:"Nokia", tiempo:"1"}, // 89
+                    { name: "CAUCACEN3", provider:"Nokia", tiempo:"1"}, // 90
+                    { name: "CCCTOUT3", provider:"Nokia", tiempo:"1"}, // 91
+                    { name: "MACHEDOS", provider:"Nokia", tiempo:"1"}, // 92
+                    { name: "ARROYO", provider:"Nokia", tiempo:"1"}, // 93
+                    { name: "AERONAC1", provider:"Nokia", tiempo:"1"}, // 94
+                    { name: "PROPAUNO", provider:"Nokia", tiempo:"1"}, // 95
+                    { name: "PROPACUA", provider:"Nokia", tiempo:"1"}, // 96
+                    { name: "PROPADOS", provider:"Nokia", tiempo:"1"}, // 97
+                    { name: "NVOCIRCO", provider:"Nokia", tiempo:"1"}, // 98
+                    { name: "ESQVENUS", provider:"Nokia", tiempo:"1"}, // 99
+                    { name: "URBINDOS1", provider:"Nokia", tiempo:"1"}, // 100
+                    { name: "PASTODOS1", provider:"Nokia", tiempo:"1"}, // 101
+                    { name: "PVENEDOS", provider:"Nokia", tiempo:"1"}, // 102
+                    { name: "ABELLOCCS", provider:"Nokia", tiempo:"1"}, // 103
+                    { name: "BELMOTRE", provider:"Nokia", tiempo:"1"}, // 104
+                    { name: "BELMONOR", provider:"Nokia", tiempo:"1"}, // 105
+                    { name: "ALINCOLN", provider:"Nokia", tiempo:"1"}, // 106
+                    { name: "PASTOUNO", provider:"Nokia", tiempo:"1"}, // 107
+                    { name: "CPLAZADOS", provider:"Nokia", tiempo:"1"}, // 108
+                    { name: "CALVARIO", provider:"Nokia", tiempo:"1"}, // 109
+                    { name: "MAXPLAZA_GEST", provider:"Nokia", tiempo:"1"}, // 110
+                    { name: "TESTCUNO", provider:"Nokia", tiempo:"1"}, // 111
+                    { name: "MORGUE", provider:"Nokia", tiempo:"1"}, // 112
+                    { name: "ALGODONAL", provider:"Nokia", tiempo:"1"}, // 113
+                    { name: "CHORRDOS2", provider:"Nokia", tiempo:"1"}, // 114
+                    { name: "CORTITRE11", provider:"Nokia", tiempo:"1"}, // 115
+                    { name: "DISTRUIC3", provider:"Nokia", tiempo:"1"}, // 116
+                    { name: "DOSCAMIN2", provider:"Nokia", tiempo:"1"}, // 117
+                    { name: "ESMERDOS3", provider:"Nokia", tiempo:"1"}, // 118
+                    { name: "ESTANCIA33", provider:"Nokia", tiempo:"1"}, // 119
+                    { name: "FLOREDOS3", provider:"Nokia", tiempo:"1"}, // 120
+                    { name: "FLSTAUNO2", provider:"Nokia", tiempo:"1"}, // 121
+                    { name: "FUENTE2B", provider:"Nokia", tiempo:"1"}, // 122
+                    { name: "HMILITAR1", provider:"Nokia", tiempo:"1"}, // 123
+                    { name: "HOSPITAL3", provider:"Nokia", tiempo:"1"}, // 124
+                    { name: "MARIPUNO2", provider:"Nokia", tiempo:"1"}, // 125
+                    { name: "MONICDOS2", provider:"Nokia", tiempo:"1"}, // 126
+                    { name: "MTECLARO1", provider:"Nokia", tiempo:"1"}, // 127
+                    { name: "OBSERVA11", provider:"Nokia", tiempo:"1"}, // 128
+                    { name: "OCUMAUNO2", provider:"Nokia", tiempo:"1"}, // 129
+                    { name: "PMROMAYO3B", provider:"Nokia", tiempo:"1"}, // 130
+                    { name: "PPLBOLEI1", provider:"Nokia", tiempo:"1"}, // 131
+                    { name: "PQESTE2B", provider:"Nokia", tiempo:"1"}, // 132
+                    { name: "UBELMOUNO", provider:"Nokia", tiempo:"1"}, // 134
+                    { name: "UCCCTOUT", provider:"Nokia", tiempo:"1"}, // 135
+                    { name: "SALESIANO3", provider:"Nokia", tiempo:"1"}, // 136
+                    { name: "SJRIOCHI2B", provider:"Nokia", tiempo:"1"}, // 137
+                    { name: "TAMBOR3", provider:"Nokia", tiempo:"1"}, // 138
+                    { name: "UCCCHAGUA2", provider:"Nokia", tiempo:"1"}, // 139
+                    { name: "URBURDAN2", provider:"Nokia", tiempo:"1"}, // 140
+                    { name: "USBUNO3B", provider:"Nokia", tiempo:"1"}, // 141
+                    { name: "VIRGINIA3", provider:"Nokia", tiempo:"1"}, // 142
+                    { name: "VTALEGRE2", provider:"Nokia", tiempo:"1"}, // 143
+                    { name: "YAGUARA1B", provider:"Nokia", tiempo:"1"}, // 144
+                    { name: "RNC10CCS", provider:"Nokia", tiempo:"1"} // 145
+                ],
+                edges: [
+                    //{ source: 0, target: 1 },
+                   { source: 0, target: 83 }, // ANTIMANO
+                    { source: 1, target: 84 }, // AVPEDROTQ1
+                    { source: 2, target: 85 }, // MANICOMI1
+                    { source: 3, target: 86 }, // BELARTES22
+                    { source: 4, target: 87 }, // CANDELAR1 
+                    { source: 5, target: 88 }, // CARRIUNO33
+                    { source: 6, target: 89 }, // CCSBSC04
+                    { source: 7, target: 90 },
+                    { source: 8, target: 91 },
+                    { source: 9, target: 92 },
+                    { source: 9, target: 9 },
+                    { source: 9, target: 94 },
+                    { source: 10, target: 95 },
+                    { source: 10, target: 31 },
+                    { source: 10, target: 96 },
+                    { source: 10, target: 97 },
+                    { source: 11, target: 98 },
+                    { source: 11, target: 99 },
+                    { source: 11, target: 11 },
+                    { source: 12, target: 100 },
+                    { source: 13, target: 101 },
+                    { source: 14, target: 102 },
+                    { source: 14, target: 103 },
+                    { source: 14, target: 104 },
+                    { source: 14, target: 105 },
+                    { source: 14, target: 106 },
+                    { source: 15, target: 107 },
+                    { source: 16, target: 108 },
+                    { source: 17, target: 109 },
+                    { source: 17, target: 110 },
+                    { source: 18, target: 111 },
+                    { source: 19, target: 112 },
+                    { source: 20, target: 113 },
+                    { source: 21, target: 114 },
+                    { source: 22, target: 115 },
+                    { source: 23, target: 116 },
+                    { source: 24, target: 117 },
+                    { source: 25, target: 118 },
+                    { source: 26, target: 119 },
+                    { source: 27, target: 120 },
+                    { source: 28, target: 121 },
+                    { source: 29, target: 122 },
+                    { source: 30, target: 123 },
+                    { source: 31, target: 124 },
+                    { source: 32, target: 125 },
+                    { source: 33, target: 126 },
+                    { source: 34, target: 127 },
+                    { source: 35, target: 128 },
+                    { source: 36, target: 129 },
+                    { source: 37, target: 130 },
+                    { source: 38, target: 131 },
+                    { source: 39, target: 132 },
+                    { source: 40, target: 40 },
+                    { source: 40, target: 134 },
+                    { source: 135, target: 144 },
+                    { source: 42, target: 136 },
+                    { source: 43, target: 137 },
+                    { source: 44, target: 138 },
+                    { source: 45, target: 139 },
+                    { source: 46, target: 140 },
+                    { source: 47, target: 141 },
+                    { source: 48, target: 142 },
+                    { source: 49, target: 143 },
+                    { source: 50, target: 144 },
+                    { source: 60, target: 64 },
+                    { source: 19, target: 54 },
+                    { source: 63, target: 66 },
+                    { source: 40, target: 61 },
+                    { source: 62, target: 65 },
+                    { source: 81, target: 82 },
+                    { source: 78, target: 79 },
+                    { source: 75, target: 76 },
+                    { source: 9, target: 77 },
+                    { source: 69, target: 70 },
+                    { source: 69, target: 70 },
+                    { source: 67, target: 68 }//*/
+
+
+                ]
+            };
+
+            //Initialize a default force layout, using the nodes and edges in dataset
+            var force = d3.layout.force()
+                                 .nodes(dataset.nodes)
+                                 .links(dataset.edges)
+                                 .size([w, h])
+                                 .linkDistance([30])
+                                 .charge([-50])
+                                 .start();
+
+            var colors = d3.scale.category10();
+
+            //Create SVG element
+
+            var svg = d3.select(".graph")
+                        .append("svg")
+                        .attr("width", w)
+                        .attr("height", h);
+
+            var vis2 = d3.select(".gra").append("svg")
+                        .attr("width", 20)
+                        .attr("height", 20)
+                        .attr("align","center")
+                        .attr("id", "svg_vis2");
+            
+  
+            //Create edges as lines
+            var edges = svg.selectAll("line")
+                .data(dataset.edges)
+                .enter()
+                .append("line")
+                .style("stroke", "white")
+                .style("stroke-width", 1)
+                //.style("opacity", "0.2");
+            //Create nodes as circles
+            var nodes = svg.selectAll("circle")
+                .data(dataset.nodes)
+                .enter()
+                .append("circle")
+                .attr("r", 10)
+                //.style("fill", "#39AECF")
+                //.style("opacity", "0.2")
+                .style("opacity",function(d){
+                     if (d.tiempo.indexOf(tiempo) != -1) {
+                        return "1";  
+                    }else{
+                        return "0.2";  
+                    }
+                })
+                .style("fill", function(d, i) {
+                    return color[d.provider]; 
+                })//*/
+                .call(force.drag)
+                .on("mouseover",function(d){
+                                                                       //Agrego tooltip que aparece cuando se para el cursos sobre un circulo
+                    d3.select("#tooltipCircle")
+                    .style("left",  d.x + "px")
+                    .style("top",  d.y + "px");
+                    //$("#proveedorNombre").html(d.name);
+                    $("#tipoAlerta").html("<strong>"+d.provider+"</strong>");
+                    //$("#cantidadAlerta").html("<strong>"+d.total_severity[d.severity]+"</strong>");
+                    $("#proveedorNombre").html(d.name);
+
+
+                    d3.select("#tooltipCircle").classed("hidden", false);
+                })
+                .on("mouseout", function() {
+                    d3.select("#tooltipCircle").classed("hidden", true);
+                });
+            
+            //Every time the simulation "ticks", this will be called
+            force.on("tick", function() {
+
+                edges.attr("x1", function(d) { return d.source.x; })
+                     .attr("y1", function(d) { return d.source.y; })
+                     .attr("x2", function(d) { return d.target.x; })
+                     .attr("y2", function(d) { return d.target.y; });
+            
+                nodes.attr("cx", function(d) { return d.x; })
+                     .attr("cy", function(d) { return d.y; });
+    
+            });
+
+             
+
+            function nextTime(){
+               //alert("siguiente tiempo") ;
+               if(tiempo < 3){
+                tiempo += 1;
+               }
+               console.log(tiempo);
+               $("#time").text(t_array[tiempo-1]).fadeIn();
+               
+               svg.selectAll("circle")
+                   .transition()
+                   .duration(1000)
+                   .style("opacity",function(d){
+                     if (d.tiempo.indexOf(tiempo) != -1) {
+                        return "1";  
+                    }else{
+                        return "0.2";  
+                    }
+                })
+                
+            }
+
+            function backTime(){
+                 //alert("tiempo anterior"); 
+                if(tiempo > 1){
+                    tiempo -= 1;
+                }
+                console.log(tiempo);
+                $("#time").text(t_array[tiempo-1]).fadeIn();
+               
+                svg.selectAll("circle")
+                   .transition()
+                   .duration(1000)
+                   .style("opacity",function(d){
+                     if (d.tiempo.indexOf(tiempo) != -1) {
+                        return "1";  
+                    }else{
+                        return "0.2";  
+                    }
+                })
+                
+            
+            }
+
+
+
+            $( document ).ready(function() {
+               /* $('input.typeahead').typeahead({                                
+                      name: 'equipos',
+                      local: ["equipo1","aquipo2","uquipo3"]           
+                });*/
+                //$('.datepicker').datepicker();
+            })
+        </script>
+    </body>
+</html>

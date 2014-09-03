@@ -1,0 +1,22 @@
+conf = new BaseConfiguration();
+conf.setProperty("storage.backend","hbase");
+conf.setProperty("storage.hostname","localhost");
+g = TitanFactory.open(conf); 
+bg = new BatchGraph(g, VertexIDType.STRING, 20000)
+
+new File("/home/asabater/Documents/Data/Digitel/nodes.csv").each({ line ->
+  (identificador, elemento) = line.split("~")
+  nodo = bg.addVertex("nodo::" + identificador)
+  ElementHelper.setProperties(nodo, ["elemento":elemento])
+})
+
+
+
+ new File("/home/asabater/Documents/Data/Digitel/edges.csv").each({ line ->  
+	(source, label, target) = line.split("\t")
+	System.out.println("El cono de madre es "+source+", "+ target);
+	v1 = bg.getVertex("nodo::" + source)
+	v2 = bg.getVertex("nodo::" + target)
+	bg.addEdge(null, v1, v2, label)
+})
+bg.commit()

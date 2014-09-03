@@ -1,0 +1,24 @@
+/* SCRIPT PARA CREAR GRAFO EN TITAN CON VERTICES Y RELACIONES */
+
+conf = new BaseConfiguration();
+conf.setProperty("storage.backend","hbase");
+conf.setProperty("storage.hostname","dn1.hc.local,dn2.hc.local,dn3.hc.local,dn4.hc.local,dn5.hc.local,dn6.hc.local,dn7.hc.local,dn8.hc.local,dn9.hc.local");
+g = TitanFactory.open(conf); 
+bg = new BatchGraph(g, VertexIDType.STRING, 20000)
+
+new File("/home/digitel/vertex.csv").each({ line ->
+  (identificador, elemento, repeticiones, proveedor) = line.split("\t")
+  nodo = bg.addVertex("nodo::" + identificador)
+  ElementHelper.setProperties(nodo, ["elemento":elemento,"identificador":identificador.toInteger(),"repeticiones":repeticiones.toInteger(),"proveedor":proveedor])
+})
+
+
+new File("/home/digitel/edges_agosto_distinct_diccionario_total.csv").each({ line ->  
+  (source, label, target, severidadCuenta) = line.split("\t")
+  System.out.println("El cono de madre es "+source+", "+ target);
+  v1 = bg.getVertex("nodo::" + source)
+  v2 = bg.getVertex("nodo::" + target)
+  edge = bg.addEdge(null, v1, v2, label)
+  ElementHelper.setProperties(edge, ["padre":source, "hijo":target, "severidadCuenta":severidadCuenta])
+})
+bg.commit()
