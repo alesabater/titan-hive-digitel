@@ -15,5 +15,7 @@ WEB directory > Contains two different views (Bayesian_NET.html, digitel1.html) 
     
     Bayesian_NET.html > Shows the equiments that could get affected in the case that a fail occurs.
     digitel1.html > Shows how many events happen by each severity(how critical the fail is) and provider. It is possible to arrange the visualization to see it by provider or severity using the top left buttons. The intensity of the colors refer to how critical the fail is. More intense > Critival, less intense > minor fail. 
+    
+    Note: If you click on a circle you will get a chart with the details of the day.
 
 
